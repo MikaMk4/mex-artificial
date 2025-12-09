@@ -1,12 +1,8 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.11 AS base
+FROM python:3.11 AS builder
 
-LABEL org.opencontainers.image.authors="mex@rki.de"
-LABEL org.opencontainers.image.description="Create artificial data for the MEx project."
-LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.url="https://github.com/robert-koch-institut/mex-artificial"
-LABEL org.opencontainers.image.vendor="robert-koch-institut"
+WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONOPTIMIZE=1
@@ -16,7 +12,25 @@ ENV PIP_NO_INPUT=on
 ENV PIP_PREFER_BINARY=on
 ENV PIP_PROGRESS_BAR=off
 
+COPY pyproject.toml ./
+
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir --prefix=/install .
+
+
+FROM python:3.11-slim
+
+LABEL org.opencontainers.image.authors="mex@rki.de"
+LABEL org.opencontainers.image.description="Create artificial data for the MEx project."
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.url="https://github.com/robert-koch-institut/mex-artificial"
+LABEL org.opencontainers.image.vendor="robert-koch-institut"
+
 WORKDIR /app
+
+COPY --from=builder /install /usr/local
+
+COPY . .
 
 RUN adduser \
     --disabled-password \
@@ -26,9 +40,6 @@ RUN adduser \
     --uid "10001" \
     mex
 
-COPY . .
-
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r locked-requirements.txt --no-deps
 RUN mkdir /out
 
 USER mex
