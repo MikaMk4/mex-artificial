@@ -2,10 +2,7 @@
 
 FROM python:3.11 AS builder
 
-WORKDIR /app
-
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONOPTIMIZE=1
+WORKDIR /install
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_NO_INPUT=on
@@ -14,8 +11,9 @@ ENV PIP_PROGRESS_BAR=off
 
 COPY . .
 
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --prefix=/install .
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN pdm install
 
 
 FROM python:3.11-slim
@@ -26,9 +24,12 @@ LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.url="https://github.com/robert-koch-institut/mex-artificial"
 LABEL org.opencontainers.image.vendor="robert-koch-institut"
 
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONOPTIMIZE=1
+
 WORKDIR /app
 
-COPY --from=builder /install /usr/local
+COPY --from=builder /install/.venv /usr/local/mex
 
 COPY . .
 
