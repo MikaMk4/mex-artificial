@@ -4,9 +4,7 @@ FROM python:3.11 AS builder
 
 RUN python -m venv /usr/local/mex
 
-ENV PATH="${PATH}:/usr/local/mex/bin"
-
-WORKDIR /install
+ENV PATH="/usr/local/mex/bin:$PATH"
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_NO_INPUT=on
@@ -16,7 +14,6 @@ ENV PIP_PROGRESS_BAR=off
 COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pdm config python.use_venv false
 RUN pdm install --prod --no-editable
 
 
@@ -37,7 +34,7 @@ COPY --from=builder /usr/local/mex /usr/local/mex
 
 COPY . .
 
-ENV PATH="${PATH}:/usr/local/mex/bin"
+ENV PATH="/usr/local/mex:$PATH"
 
 RUN adduser \
     --disabled-password \
