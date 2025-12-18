@@ -2,7 +2,7 @@
 
 FROM python:3.11 AS builder
 
-WORKDIR /install
+WORKDIR /usr/local/mex
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_NO_INPUT=on
@@ -29,7 +29,7 @@ ENV PYTHONOPTIMIZE=1
 
 WORKDIR /app
 
-COPY --from=builder /install/.venv /usr/local/mex
+COPY --from=builder /usr/local/mex/.venv /usr/local/mex
 
 COPY . .
 
