@@ -33,6 +33,8 @@ COPY --from=builder /install/.venv /usr/local/mex
 
 COPY . .
 
+ENV PATH="${PATH}:/usr/local/mex/bin"
+
 RUN adduser \
     --disabled-password \
     --gecos "" \
