@@ -12,7 +12,6 @@ ENV PIP_PROGRESS_BAR=off
 COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pdm lock
 RUN pdm export --prod --without-hashes > requirements.lock
 
 RUN pip wheel --no-cache-dir --wheel-dir /build/wheels -r requirements.lock
@@ -48,7 +47,7 @@ RUN adduser \
     --uid "10001" \
     mex
 
-RUN mkdir /out && chown mex:mex /out
+RUN mkdir /out
 
 USER mex
 
