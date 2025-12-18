@@ -48,7 +48,7 @@ RUN adduser \
     --uid "10001" \
     mex
 
-RUN mkdir /out
+RUN mkdir /out && chown mex:mex /out
 
 USER mex
 
