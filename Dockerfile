@@ -17,7 +17,7 @@ COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pdm config python.use_venv false
-RUN pdm install --check --prod --no-editable
+RUN pdm install --prod --no-editable
 
 
 FROM python:3.11-slim
