@@ -2,9 +2,7 @@
 
 FROM python:3.11 AS builder
 
-RUN python -m venv /usr/local/mex
-
-ENV PATH="/usr/local/mex/bin:$PATH"
+WORKDIR /build
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_NO_INPUT=on
@@ -13,8 +11,7 @@ ENV PIP_PROGRESS_BAR=off
 
 COPY . .
 
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pdm install --prod --no-editable
+RUN pip wheel --no-cache-dir --wheel-dir /build/wheels .
 
 
 FROM python:3.11-slim
@@ -30,11 +27,13 @@ ENV PYTHONOPTIMIZE=1
 
 WORKDIR /app
 
-COPY --from=builder /usr/local/mex /usr/local/mex
+COPY --from=builder /build/wheels /wheels
 
-COPY . .
-
-ENV PATH="/usr/local/mex:$PATH"
+RUN pip install --no-cache-dir \
+    --no-index \
+    --find-links=/wheels \
+    /wheels/*.whl \
+    && rm -rf /wheels
 
 RUN adduser \
     --disabled-password \
