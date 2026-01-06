@@ -11,18 +11,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changes
 
-- updated template to https://github.com/robert-koch-institut/mex-template/commit/7c3e75
-- clarify docker run example in README
-
 ### Deprecated
 
 ### Removed
 
 ### Fixed
 
-- remove unrecognized french language in test text type and replace with 'null'
-
 ### Security
+
+## [2.0.0] - 2026-01-06
+
+### Changes
+
+- updated template to https://github.com/robert-koch-institut/mex-template/commit/7c3e75
+- clarify docker run example in README
+
+### Fixed
+
+- remove unrecognized french language in test text type and replace with 'null'
 
 ## [1.2.1] - 2025-11-25
 
