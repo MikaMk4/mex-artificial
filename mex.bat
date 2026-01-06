@@ -25,7 +25,7 @@ if "%CI%"=="" (
 
 @REM install packages from lock file in local virtual environment
 echo installing package
-uv sync --extra dev
+pdm install-all
 exit /b %errorlevel%
 
 
@@ -39,20 +39,19 @@ exit /b %errorlevel%
 :unit
 @REM run the test suite with all unit tests
 echo running unit tests
-uv run pytest -m "not integration"
+pdm run pytest -m "not integration"
 exit /b %errorlevel%
 
 
 :test
 @REM run the unit and integration test suites
 echo running all tests
-uv run pytest --numprocesses=auto --dist=worksteal
+pdm run pytest --numprocesses=auto --dist=worksteal
 exit /b %errorlevel%
 
 
 :docs
 @REM use sphinx to auto-generate html docs from code
 echo generating docs
-uv run sphinx-apidoc -f -o docs/source mex
-uv run sphinx-build -aE -b dirhtml docs docs/dist
+pdm doc
 exit /b %errorlevel%
