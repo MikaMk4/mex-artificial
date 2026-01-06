@@ -1,14 +1,14 @@
 {
   "template": "https://github.com/robert-koch-institut/mex-template",
-  "commit": "1d6e08dad80ecd6e46184c539630bf78b02ec621",
-  "checkout": "feature/mx-2007-switch-from-pdm-to-uv",
+  "commit": "dc07862d2904743cc293792ee1177f72b239a7a5",
+  "checkout": null,
   "context": {
     "cookiecutter": {
       "project_name": "artificial",
       "short_summary": "Create artificial data for the MEx project.",
       "long_summary": "Create artificial extracted items, transform them into merged items and write the results into a configured sink.",
       "_template": "https://github.com/robert-koch-institut/mex-template",
-      "_commit": "1d6e08dad80ecd6e46184c539630bf78b02ec621"
+      "_commit": "dc07862d2904743cc293792ee1177f72b239a7a5"
     }
   },
   "directory": null
