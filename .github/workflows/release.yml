@@ -87,6 +87,9 @@ jobs:
           fetch-depth: 1
           ref: ${{ needs.release.outputs.tag }}
           persist-credentials: false
+        
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.0.0
 
       - name: Login to container registry
         uses: docker/login-action@v3
@@ -96,57 +99,66 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Build, tag and push docker image
+        id: build
         run: |
           docker build . \
-          --tag ghcr.io/robert-koch-institut/mex-artificial:latest \
-          --tag ghcr.io/robert-koch-institut/mex-artificial:${{ github.sha }} \
-          --tag ghcr.io/robert-koch-institut/mex-artificial:${{ needs.release.outputs.tag }}
-          docker push --all-tags ghcr.io/robert-koch-institut/mex-artificial
+          --tag ghcr.io/mikamk4/mex-artificial:latest \
+          --tag ghcr.io/mikamk4/mex-artificial:${{ github.sha }} \
+          --tag ghcr.io/mikamk4/mex-artificial:${{ needs.release.outputs.tag }}
+          docker push --all-tags ghcr.io/mikamk4/mex-artificial
 
-  distribute:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: release
-    environment:
-      name: pypi
-      url: https://pypi.org/p/mex-artificial
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-          ref: ${{ needs.release.outputs.tag }}
-          persist-credentials: false
-
-      - name: Cache requirements
-        uses: actions/cache@v5
+      - name: Sign the Image
         env:
-          cache-name: cache-requirements
-        with:
-          path: ~/.cache/pip
-          key: ${{ env.cache-name }}-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ env.cache-name }}-
-
-      - name: Setup python
-        uses: actions/setup-python@v6
-        with:
-          python-version: 3.14
-
-      - name: Install requirements
-        run: make setup
-
-      - name: Build wheel and sdist distros and create a github release
-        env:
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+          COSIGN_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+          TAGS: ghcr.io/mikamk4/mex-artificial
         run: |
-          gh release create ${{ needs.release.outputs.tag }} --generate-notes --latest --verify-tag
-          uv build --out-dir dist
-          for filename in dist/*; do
-            gh release upload ${{ needs.release.outputs.tag }} ${filename};
-          done
+          cosign sign --yes --key env://COSIGN_KEY --tlog-upload=false "${TAGS}@${DIGEST}"
 
-      - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+  # distribute:
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 10
+  #   needs: release
+  #   environment:
+  #     name: pypi
+  #     url: https://pypi.org/p/mex-artificial
+  #   permissions:
+  #     id-token: write  # IMPORTANT: mandatory for trusted publishing
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v6
+  #       with:
+  #         fetch-depth: 1
+  #         ref: ${{ needs.release.outputs.tag }}
+  #         persist-credentials: false
+
+  #     - name: Cache requirements
+  #       uses: actions/cache@v5
+  #       env:
+  #         cache-name: cache-requirements
+  #       with:
+  #         path: ~/.cache/pip
+  #         key: ${{ env.cache-name }}-${{ hashFiles('requirements.txt') }}
+  #         restore-keys: |
+  #           ${{ env.cache-name }}-
+
+  #     - name: Setup python
+  #       uses: actions/setup-python@v6
+  #       with:
+  #         python-version: 3.14
+
+  #     - name: Install requirements
+  #       run: make setup
+
+  #     - name: Build wheel and sdist distros and create a github release
+  #       env:
+  #         GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+  #       run: |
+  #         gh release create ${{ needs.release.outputs.tag }} --generate-notes --latest --verify-tag
+  #         uv build --out-dir dist
+  #         for filename in dist/*; do
+  #           gh release upload ${{ needs.release.outputs.tag }} ${filename};
+  #         done
+
+  #     - name: Publish distribution 📦 to PyPI
+  #       uses: pypa/gh-action-pypi-publish@release/v1
